@@ -59,6 +59,13 @@ struct FOverlappingWFCOptions {
     }
 };
 
+enum Direction {
+    TOP = 0,
+    RIGHT = 1,
+    BOTTOM = 2,
+    LEFT = 3,
+};
+
 /**
  * Class generating a new image with the overlapping WFC algorithm.
  */
@@ -205,29 +212,6 @@ protected:
         for (unsigned i = 0; i < max_i; i++) {
             for (unsigned j = 0; j < max_j; j++) {
                 // Compute the symmetries of every pattern in the image.
-                /*
-                symmetries[0] = input.get_sub_array(i, j, options.pattern_size, options.pattern_size);
-                symmetries[1] = symmetries[0].reflected();
-                symmetries[2] = symmetries[0].rotated();
-                symmetries[3] = symmetries[2].reflected();
-                symmetries[4] = symmetries[2].rotated();
-                symmetries[5] = symmetries[4].reflected();
-                symmetries[6] = symmetries[4].rotated();
-                symmetries[7] = symmetries[6].reflected();
-                
-                
-                symmetries[0] = Array2D<T>(options.pattern_size, options.pattern_size, input
-                    .get_sub_array(i, j, options.pattern_size, options.pattern_size).data);
-                symmetries[1] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[0].reflected().data);
-                symmetries[2] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[0].rotated().data);
-                symmetries[3] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[2].reflected().data);
-                symmetries[4] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[2].rotated().data);
-                symmetries[5] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[4].reflected().data);
-                symmetries[6] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[4].rotated().data);
-                symmetries[7] = Array2D<T>(options.pattern_size, options.pattern_size, symmetries[6].reflected().data);
-
-                */
-
                 symmetries[0].data = input.get_sub_array(i, j, options.pattern_size, options.pattern_size).data;
                 symmetries[1].data = symmetries[0].reflected().data;
                 symmetries[2].data = symmetries[0].rotated().data;
@@ -237,7 +221,6 @@ protected:
                 symmetries[6].data = symmetries[4].rotated().data;
                 symmetries[7].data = symmetries[6].reflected().data;
                 
-
                 // The number of symmetries in the option class define which symetries
                 // will be used.
                 for (int k = 0; k < options.symmetry; k++) {
@@ -396,7 +379,12 @@ public:
     OverlappingWFC(const Array2D<T>& input, const FOverlappingWFCOptions& options,
         int seed) noexcept
         : OverlappingWFC(input, options, seed, get_patterns(input, options)) {}
-
+    /**
+    * The constructor used by the user.
+    */
+    OverlappingWFC(const Array2D<T>& input, const FOverlappingWFCOptions& options,
+        int seed, const TTuple<TArray<Array2D<T>>, Direction> expand) noexcept
+        : OverlappingWFC(input, options, seed, get_patterns(input, options)) {}
     /**
      * Set the pattern at a specific position.
      * Returns false if the given pattern does not exist, or if the

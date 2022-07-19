@@ -33,15 +33,35 @@ void ASpawnLevel::CreateTexture()
 ASpawnLevel::ASpawnLevel()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	//PrimaryActorTick.bCanEverTick = true;
 
 }
 
-TArray<FLinearColor> ASpawnLevel::RunWFC()
+int positionBitValue(int i, int j) {
+	if (i == -1 && j == 0)
+		return 1;
+	if (i == -1 && j == 1)
+		return 2;
+	if (i == 0 && j == 1)
+		return 4;
+	if (i == 1 && j == 1)
+		return 8;
+	if (i == 1 && j == 0)
+		return 16;
+	if (i == 1 && j == -1)
+		return 32;
+	if (i == 0 && j == -1)
+		return 64;
+	if (i == -1 && j == -1)
+		return 128;
+	return 0;
+}
+
+void ASpawnLevel::RunWFC(TArray<FLinearColor>& colorImg, TArray<int>& wangImg)
 {
-	TArray<FLinearColor> res;
+	//TArray<FLinearColor>colorImg;
 	if (InputTexture == nullptr)
-		return res;
+		return;
 
 	TextureCompressionSettings OldCompressionSettings = InputTexture->CompressionSettings;
 	TextureMipGenSettings OldMipGenSettings = InputTexture->MipGenSettings;
@@ -68,18 +88,77 @@ TArray<FLinearColor> ASpawnLevel::RunWFC()
 
 	// Run WFC
 	for (int test = 0; test < attempts; test++) {
-		FOverlappingWFCOptions options = { out_height, out_width, periodic_input, periodic_output,  symmetry, ground, N };
+		//FOverlappingWFCOptions options = { out_height, out_width, periodic_input, periodic_output,  symmetry, ground, N };
 		OverlappingWFC<FLinearColor> mywfc(Array2D<FLinearColor>(height, width, imgInLinear), options, seed);
 		Array2D<FLinearColor> success = mywfc.run();
-		
+		int out_height = options.out_height;
+		int out_width = options.out_width;
+
 		if (success.complete) {			
-			res = success.data;
-
+			//res = success.data;
+			colorImg = success.data;
+			TArray<int>wangTemp;
+			wangTemp.SetNum(success.data.Num());
 			UE_LOG(LogTemp, Warning, TEXT("success. try #: %d"), test);		
+			FLinearColor White = FLinearColor().White;
+			for (int i = 0; i < out_height; i++) {
+				for (int j = 0; j < out_width; j++) {
+					int index = i * out_width + j;
+					int wangValue = 0;
+					if (White == success.data[index]) {
+						int topi = (i - 1) * out_width + j;
+						int righti = i * out_width + (j + 1);
+						int bottomi = (i + 1) * out_width + j;
+						int lefti = i * out_width + (j - 1);
+						bool top = false;
+						bool right = false;
+						bool bottom = false;
+						bool left = false;
 
-			for (int i = 0; i < res.Num(); i++) {
-				// process out image data
+						if (i - 1 >= 0 && White == success.data[topi]) {
+							wangValue += positionBitValue(-1, 0);
+							top = true;
+						}
+						if (j + 1 < out_width && White == success.data[righti]) {
+							wangValue += positionBitValue(0, 1);
+							right = true;
+						}
+						if (i + 1 < out_height && White == success.data[bottomi]) {
+							wangValue += positionBitValue(1, 0);
+							bottom = true;
+						}
+						if (j - 1 >= 0 && White == success.data[lefti]) {
+							wangValue += positionBitValue(0, -1);
+							left = true;
+						}
+
+						if (top && right && White == success.data[(i - 1) * out_width + (j + 1)])
+							wangValue += positionBitValue(-1, 1);
+						if (right && bottom && White == success.data[(i + 1) * out_width + (j + 1)])
+							wangValue += positionBitValue(1, 1);
+						if (bottom && left && White == success.data[(i + 1) * out_width + (j - 1)])
+							wangValue += positionBitValue(1, -1);
+						if (left && top && White == success.data[(i - 1) * out_width + (j - 1)])
+							wangValue += positionBitValue(-1, -1);
+					}
+					/*
+					for (int u = -1; u <= 1; u++)
+					{
+						for (int v = -1; v <= 1; v++)
+						{
+							if (i - u >= 0 && j - v >= 0 && i - u < out_height && j - v < out_width && !(u == 0 && v == 0))
+							{
+								int mindex = (i - u) * out_width + (j - v);
+								if (FLinearColor().White == success.data[mindex])
+									wangValue += positionBitValue(u, v);
+							}
+						}
+					}
+					*/
+					wangTemp[index] = wangValue;
+				}
 			}
+			wangImg = wangTemp;
 			break;
 		}
 		else {
@@ -93,19 +172,12 @@ TArray<FLinearColor> ASpawnLevel::RunWFC()
 	InputTexture->MipGenSettings = OldMipGenSettings;
 	InputTexture->SRGB = OldSRGB;
 	InputTexture->UpdateResource();
-	return res;
+
 }
 
 // Called when the game starts or when spawned
 void ASpawnLevel::BeginPlay()
 {
 	Super::BeginPlay();
-
-}
-
-// Called every frame
-void ASpawnLevel::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
 }

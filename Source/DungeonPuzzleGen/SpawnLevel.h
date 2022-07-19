@@ -8,6 +8,7 @@
 #include "SpawnLevel.generated.h"
 
 
+
 UCLASS()
 class DUNGEONPUZZLEGEN_API ASpawnLevel : public AActor
 {
@@ -15,22 +16,9 @@ class DUNGEONPUZZLEGEN_API ASpawnLevel : public AActor
 
 public:	
 	// Sets default values for this actor's properties
-	ASpawnLevel();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
+	FOverlappingWFCOptions options;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	int out_width = 32;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	int out_height = 32;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	int N = 3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	bool periodic_output = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	bool periodic_input = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	bool ground = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
-	int symmetry = 8;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
 	int attempts = 10;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
@@ -39,8 +27,13 @@ public:
 	UTexture2D* InputTexture = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "Populate")
-	virtual TArray<FLinearColor> RunWFC();
+	void RunWFC(TArray<FLinearColor>& colorImg, TArray<int>& wangImg);
 
+	int directions_x[8] = {0,1,1,1,0,-1,-1,-1 };
+	//enum direction_x {
+	//	TOP = 0,
+	//};
+	int directions_y[8] = {-1,-1,0,1,1,1,0,-1 };
 	/*
 	// Set Mesh		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Populate")
@@ -54,6 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Populate")
 	virtual void AddInstance(FTransform Transformation);
 	*/
+	ASpawnLevel();
 
 protected:
 	// Called when the game starts or when spawned
@@ -62,11 +56,4 @@ protected:
 	//UPROPERTY(VisibleAnywhere)
 	//UInstancedStaticMeshComponent* InstancedStaticMeshComponent;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-
-	//private
-	//AActor* InstancedActor;
 };
