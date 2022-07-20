@@ -58,13 +58,14 @@ struct FOverlappingWFCOptions {
         return periodic_output ? out_width : out_width - pattern_size + 1;
     }
 };
-
+/*
 enum Direction {
     TOP = 0,
     RIGHT = 1,
     BOTTOM = 2,
     LEFT = 3,
 };
+*/
 
 /**
  * Class generating a new image with the overlapping WFC algorithm.
@@ -381,10 +382,11 @@ public:
         : OverlappingWFC(input, options, seed, get_patterns(input, options)) {}
     /**
     * The constructor used by the user.
-    */
+  
     OverlappingWFC(const Array2D<T>& input, const FOverlappingWFCOptions& options,
         int seed, const TTuple<TArray<Array2D<T>>, Direction> expand) noexcept
         : OverlappingWFC(input, options, seed, get_patterns(input, options)) {}
+          */
     /**
      * Set the pattern at a specific position.
      * Returns false if the given pattern does not exist, or if the

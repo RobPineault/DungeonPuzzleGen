@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "overlapping_wfc.h"
+#include "Graph.h"
 #include "GameFramework/Actor.h"
 #include "SpawnLevel.generated.h"
 
@@ -15,6 +16,8 @@ class DUNGEONPUZZLEGEN_API ASpawnLevel : public AActor
 	GENERATED_BODY()
 
 public:	
+	int width_in = 0;
+	int height_in = 0;
 	// Sets default values for this actor's properties
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Options")
 	FOverlappingWFCOptions options;
@@ -27,13 +30,24 @@ public:
 	UTexture2D* InputTexture = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "Populate")
-	void RunWFC(TArray<FLinearColor>& colorImg, TArray<int>& wangImg);
+	void RunWFC(TArray<int>& wangImg);
+
+	UFUNCTION(BlueprintCallable, Category = "Hi")
+	void NumPieces(TArray<int> wangTiles, int width, int& Pieces, int& maxPieceSize, TArray<int>& maxPiece);
+	//UFUNCTION(BlueprintCallable, Category = "Populate")
+	//void getPieces(int& pieces);
 
 	int directions_x[8] = {0,1,1,1,0,-1,-1,-1 };
 	//enum direction_x {
 	//	TOP = 0,
 	//};
 	int directions_y[8] = {-1,-1,0,1,1,1,0,-1 };
+
+	//Graph* levelGraph;
+
+	TArray<FLinearColor> CopyTexture();
+	
+	TArray<int> ProcessImage(TArray<FLinearColor> image);
 	/*
 	// Set Mesh		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Populate")
@@ -55,5 +69,6 @@ protected:
 	
 	//UPROPERTY(VisibleAnywhere)
 	//UInstancedStaticMeshComponent* InstancedStaticMeshComponent;
+private:
 
 };
