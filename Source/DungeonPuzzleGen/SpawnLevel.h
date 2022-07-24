@@ -30,7 +30,7 @@ public:
 	UTexture2D* InputTexture = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "Populate")
-	void RunWFC(TArray<int>& wangImg);
+	void RunWFC(TArray<int>& wangImg, bool& succeeded );
 
 	UFUNCTION(BlueprintCallable, Category = "Hi")
 	void NumPieces(TArray<int> wangTiles, int width, int& Pieces, int& maxPieceSize, TArray<int>& maxPiece);

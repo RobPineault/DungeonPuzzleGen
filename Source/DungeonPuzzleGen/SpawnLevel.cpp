@@ -145,25 +145,25 @@ TArray<int> ASpawnLevel::ProcessImage(TArray<FLinearColor> image) {
 	return wangTemp;
 }
 
-void ASpawnLevel::RunWFC(TArray<int>& wangImg)
+void ASpawnLevel::RunWFC(TArray<int>& wangImg, bool& succeeded)
 {
 	// Run WFC
 	TArray<FLinearColor> ImageIn = CopyTexture();
+	bool successful;
 	for (int test = 0; test < attempts; test++) {
-		//FOverlappingWFCOptions options = { out_height, out_width, periodic_input, periodic_output,  symmetry, ground, N };
 		OverlappingWFC<FLinearColor> mywfc(Array2D<FLinearColor>(height_in, width_in, ImageIn), options, seed);
 		Array2D<FLinearColor> success = mywfc.run();
-
+	
 		if (success.complete) {		
 			wangImg = ProcessImage(success.data);
+			successful = true;
 			break;
 		}
-		else {
-			if(test == attempts -1)
-				UE_LOG(LogTemp, Warning, TEXT("failed"));
+		else if(test + 1 == attempts) {
+			successful = false;
 		}
 	}
-	// Restore input texture
+	succeeded = successful;
 }
 void ASpawnLevel::NumPieces(TArray<int> wangTiles, int width, int& numPieces, int& maxPieceSize, TArray<int>& maxPiece) {
 	Graph graph;
