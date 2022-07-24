@@ -10,7 +10,7 @@
  * Represent a 2D array.
  * The 2D array is stored in a single array, to improve cache usage.
  */
-template <typename T> class Array2D
+template <typename T> class DUNGEONPUZZLEGEN_API Array2D
 {
 public:
     /**

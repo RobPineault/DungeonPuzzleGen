@@ -11,7 +11,7 @@
   * Represent a 3D array.
   * The 3D array is stored in a single array, to improve cache usage.
   */
-template <typename T> class Array3D
+template <typename T> class DUNGEONPUZZLEGEN_API Array3D
 {
 
 public:
