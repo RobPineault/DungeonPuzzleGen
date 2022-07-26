@@ -149,7 +149,7 @@ void ASpawnLevel::RunWFC(TArray<int>& wangImg, bool& succeeded)
 {
 	// Run WFC
 	TArray<FLinearColor> ImageIn = CopyTexture();
-	bool successful;
+	bool successful = false;
 	for (int test = 0; test < attempts; test++) {
 		OverlappingWFC<FLinearColor> mywfc(Array2D<FLinearColor>(height_in, width_in, ImageIn), options, seed);
 		Array2D<FLinearColor> success = mywfc.run();
@@ -165,23 +165,20 @@ void ASpawnLevel::RunWFC(TArray<int>& wangImg, bool& succeeded)
 	}
 	succeeded = successful;
 }
-void ASpawnLevel::NumPieces(TArray<int> wangTiles, int width, int& numPieces, int& maxPieceSize, TArray<int>& maxPiece) {
-	Graph graph;
-	graph.Init(wangTiles, width);
-	TArray<TArray<int>> pieces = graph.BFS();
-	int maxPieceCount = 0;
-	int maxPieceIndex = 0;
-	for (int i = 0; i < pieces.Num(); i++) {
-		if (maxPieceCount < pieces[i].Num()) {
-			maxPieceCount = pieces[i].Num();
-			maxPieceIndex = i;
-		}
-	}
-	numPieces = pieces.Num();
-	maxPieceSize = maxPieceCount;
-	maxPiece = pieces[maxPieceIndex];
+void ASpawnLevel::ProccessOutput(TArray<int> wangTiles, int width, int& rooms, TArray<int>& maxPiece) {
+	
+	levelGraph.Init(wangTiles, width);
+	levelGraph.ExtractLargestPiece();
+	levelGraph.CreateRooms();
+	levelGraph.SetPaths();
+	//graph.ExtractLargestPiece();
+	rooms = levelGraph.Rooms.Num();
+	maxPiece = levelGraph.largestPiece;// pieces[maxPieceIndex];
 }
-
+void ASpawnLevel::GetTreasureRoom(int start, TArray<int>& endRoom) {
+	Room room = levelGraph.FarthestRoom(start);
+	endRoom = room.innerTiles;
+}
 // Called when the game starts or when spawned
 void ASpawnLevel::BeginPlay()
 {

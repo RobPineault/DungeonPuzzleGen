@@ -32,8 +32,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Populate")
 	void RunWFC(TArray<int>& wangImg, bool& succeeded );
 
+	Graph levelGraph;
+
 	UFUNCTION(BlueprintCallable, Category = "Hi")
-	void NumPieces(TArray<int> wangTiles, int width, int& Pieces, int& maxPieceSize, TArray<int>& maxPiece);
+	void ProccessOutput(TArray<int> wangTiles, int width, int& rooms, TArray<int>& maxPiece);
+
+	UFUNCTION(BlueprintCallable, Category = "Hi")
+	void GetTreasureRoom(int start,  TArray<int>& endRoom);
+
 	//UFUNCTION(BlueprintCallable, Category = "Populate")
 	//void getPieces(int& pieces);
 
@@ -69,6 +75,5 @@ protected:
 	
 	//UPROPERTY(VisibleAnywhere)
 	//UInstancedStaticMeshComponent* InstancedStaticMeshComponent;
-private:
 
 };
