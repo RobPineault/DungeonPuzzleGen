@@ -3,32 +3,7 @@
 
 
 #include "SpawnLevel.h"
-/*
-void ASpawnLevel::CreateTexture() 
-{
-	UTextureRenderTarget2D* TextureRenderTarget;
-	// Creates InputTexture to store TextureRenderTarget content
-	UInputTexture* Texture = UInputTexture::CreateTransient(TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, PF_B8G8R8A8);
-#if WITH_EDITORONLY_DATA
-	Texture->MipGenSettings = TMGS_NoMipmaps;
-#endif
-	Texture->SRGB = TextureRenderTarget->SRGB;
-
-	// Read the pixels from the RenderTarget and store them in a FLinearColor array
-	TArray<FLinearColor> SurfData;
-	FRenderTarget* RenderTarget = TextureRenderTarget->GameThread_GetRenderTargetResource();
-	RenderTarget->ReadPixels(SurfData);
-
-	// Lock and copies the data between the textures
-	void* TextureData = Texture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-	const int32 TextureDataSize = SurfData.Num() * 4;
-	FMemory::Memcpy(TextureData, SurfData.GetData(), TextureDataSize);
-	Texture->PlatformData->Mips[0].BulkData.Unlock();
-	// Apply Texture changes to GPU memory
-	Texture->UpdateResource();
-	// Sets default values
-}
-*/
+#include "Engine/TextureDefines.h"
 
 ASpawnLevel::ASpawnLevel()
 {
@@ -165,20 +140,41 @@ void ASpawnLevel::RunWFC(TArray<int>& wangImg, bool& succeeded)
 	}
 	succeeded = successful;
 }
-void ASpawnLevel::ProccessOutput(TArray<int> wangTiles, int width, int& rooms, TArray<int>& maxPiece) {
+void ASpawnLevel::ProccessOutput(TArray<int> wangTiles,int& spawnIndex, TArray<int>& maxPiece, TArray<FRoomData>& Rooms) {
 	
-	levelGraph.Init(wangTiles, width);
+	levelGraph.Init(wangTiles, options.out_width);
 	levelGraph.ExtractLargestPiece();
-	levelGraph.CreateRooms();
-	levelGraph.SetPaths();
-	//graph.ExtractLargestPiece();
-	rooms = levelGraph.Rooms.Num();
-	maxPiece = levelGraph.largestPiece;// pieces[maxPieceIndex];
+	levelGraph.GenerateNodes();
+	levelGraph.GenerateRoomsAndSegments();
+	levelGraph.FarthestRoom();
+	spawnIndex = levelGraph.spawnIndex;
+	maxPiece = levelGraph.largestPiece;
+	TArray<FRoomData> r;
+	for (Room room : levelGraph.Rooms) {
+		FRoomData data;
+		data.roomNumber = room.roomNumber;
+		data.inner = room.innerTiles;
+		//data.exits = room.exits;
+		data.isEnd = room.isEndRoom;
+		data.distanceFromStart = room.distanceFromStart;
+		//data.deadEnds = room.PackagePaths();
+		r.Add(data);
+	}
+	//MainPaths = levelGraph.PathAdj.Package();
+	Rooms = r;
 }
+
+
 void ASpawnLevel::GetTreasureRoom(int start, TArray<int>& endRoom) {
-	Room room = levelGraph.FarthestRoom(start);
-	endRoom = room.innerTiles;
+	Room newRoom;
+	for (Room room : levelGraph.Rooms) {
+		if (room.isEndRoom)
+			newRoom = room;
+	}
+	endRoom = newRoom.innerTiles;
 }
+
+
 // Called when the game starts or when spawned
 void ASpawnLevel::BeginPlay()
 {

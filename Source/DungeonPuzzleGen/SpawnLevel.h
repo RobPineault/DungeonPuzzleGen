@@ -8,7 +8,21 @@
 #include "GameFramework/Actor.h"
 #include "SpawnLevel.generated.h"
 
+USTRUCT(BlueprintType)
+struct FRoomData {
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int roomNumber;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int> inner;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//TArray<int> exits;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isEnd;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int distanceFromStart;
+};
 
 UCLASS()
 class DUNGEONPUZZLEGEN_API ASpawnLevel : public AActor
@@ -35,11 +49,38 @@ public:
 	Graph levelGraph;
 
 	UFUNCTION(BlueprintCallable, Category = "Hi")
-	void ProccessOutput(TArray<int> wangTiles, int width, int& rooms, TArray<int>& maxPiece);
+	void ProccessOutput(TArray<int> wangTiles, int& spawnIndex, TArray<int>& maxPiece, TArray<FRoomData>& Rooms);
 
 	UFUNCTION(BlueprintCallable, Category = "Hi")
 	void GetTreasureRoom(int start,  TArray<int>& endRoom);
 
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void GetRoomData(int roomIndex, TArray<int>& room) {
+	};
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void GetNodes(TArray<int>& Nodes) {
+		TArray<int> res;
+		for (Node n : levelGraph.Nodes) {
+			res.Add(n.index);
+		}
+		Nodes = res;
+	};
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void GetExit(int& exitIndex) {
+
+		int exit = levelGraph.exitIndex;
+		exitIndex = exit;
+	};
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void GetSegment(FSegment& segment) {
+		FSegment s;
+		if (levelGraph.Segments.Num() > 0) {
+			s = levelGraph.Segments[FMath::RandRange(0, levelGraph.Segments.Num() - 1)];
+			s.Tiles.Sort();
+		}
+
+		segment = s;
+	};
 	//UFUNCTION(BlueprintCallable, Category = "Populate")
 	//void getPieces(int& pieces);
 
